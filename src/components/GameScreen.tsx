@@ -118,7 +118,7 @@ export default function GameScreen({
       return wrap(
         <div className="phase-anim" key={"beat-mg" + beat.id}>
           {cons.length > 0 && <ConsequenceBanner cons={cons} />}
-          <MiniGame mg={mg} specId={p.specId} onDone={(correct) => {
+          <MiniGame mg={mg} specId={p.specId} traitId={p.traitId} onDone={(correct) => {
             const r = engine.resolveBeatMiniGame(correct);
             const eff = correct ? mg.win : mg.lose;
             if (eff) showDelta(eff);
@@ -137,7 +137,7 @@ export default function GameScreen({
         {cons.length > 0 && <ConsequenceBanner cons={cons} />}
         {beat.advisor && beat.intro && (
           <div className={"advisor-pop " + beat.advisor}>
-            <AdvisorAvatar who={beat.advisor} size={48} />
+            <AdvisorAvatar who={beat.advisor} size={72} />
             <div className="min-w-0">
               <div className={"text-[10px] font-black uppercase tracking-wider " + (beat.advisor === "anna" ? "text-sky-400" : "text-orange-400")}>
                 {beat.advisor === "anna" ? "Анна заходит" : "Макс заходит"}
@@ -361,7 +361,7 @@ export default function GameScreen({
     if (!mg) { engine.processMiniGame(false); onChange(); return null; }
     return wrap(
       <div className="phase-anim" key="mg">
-        <MiniGame mg={mg} specId={p.specId} onDone={(correct) => {
+        <MiniGame mg={mg} specId={p.specId} traitId={p.traitId} onDone={(correct) => {
           engine.processMiniGame(correct);
           if (correct) showDelta({ reputation: 3, karma: 1 });
           onChange();

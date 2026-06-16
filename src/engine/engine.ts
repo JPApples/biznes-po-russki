@@ -133,14 +133,36 @@ export class GameEngine {
 
   /** Inspection scaled by current shadow — generated, not authored. */
   private makeInspection(): Beat {
-    const fine = Math.max(3, Math.round(this.player.shadow / 4));
+    let fine = Math.max(3, Math.round(this.player.shadow / 4));
+    let waived = false;
+    if (this.player.traitId === "iron_logic" && !this.player.flags.fineWaived) { // железная логика: отмена 1 штрафа
+      fine = 0; waived = true; this.player.flags.fineWaived = true;
+    }
     return {
       id: "inspection", kind: "check", day: 0, dow: "Внезапно", icon: "danger",
       title: "Налоговая проверка",
       text: `К тебе пришла проверка. Тень закона ${this.player.shadow}% — есть к чему придраться.`,
       choices: [
-        { id: "A", text: `Сотрудничать и заплатить штраф (${fine}$)`, type: "situational", effects: { money: -fine, shadow: -25, nerves: 8 }, outcome: `Штраф ${fine}$ уплачен, тень закона снижена.`, anna: "Лучше закрыть вопрос и спать спокойно." },
+        {
+          id: "A",
+          text: waived ? "Предъявить безупречные документы" : `Сотрудничать и заплатить штраф (${fine}$)`,
+          type: "situational", effects: { money: -fine, shadow: -25, nerves: waived ? 0 : 8 },
+          outcome: waived ? "Железная логика: придраться не к чему — штраф отменён." : `Штраф ${fine}$ уплачен, тень закона снижена.`,
+          anna: "Лучше закрыть вопрос и спать спокойно.",
+        },
         { id: "B", text: "Спорить и тянуть время", type: "harmful", effects: { shadow: 12, nerves: 15, karma: -2 }, outcome: "Проверка ушла злее, чем пришла. Станет только хуже.", max: "Качай права... хотя тут я бы притих." },
+      ],
+    };
+  }
+
+  /** Феникс: один рестарт с опытом вместо проигрыша. */
+  private phoenixBeat(reason: string): Beat {
+    return {
+      id: "phoenix", kind: "choice", day: 0, dow: "Из пепла", icon: "fire",
+      title: "Феникс: второй шанс",
+      text: `Ты был на грани (${reason}), но твоя черта «Феникс» подняла тебя из пепла — с опытом и наукой. Второго такого спасения не будет.`,
+      choices: [
+        { id: "A", text: "Подняться и продолжить", type: "reliable", effects: { karma: 3, nerves: -10 }, outcome: "Ты выстоял. Теперь — осторожнее." },
       ],
     };
   }
@@ -161,13 +183,26 @@ export class GameEngine {
   /** Returns true (and ends the game) if any lose condition is met. */
   private checkLose(): boolean {
     const rule = LOSE_RULES.find((r) => r.test(this.player));
-    if (rule) {
-      this.player.flags.lossReason = rule.title;
-      this.player.flags.lossDesc = rule.desc;
-      this.phase = "ending";
-      return true;
+    if (!rule) return false;
+    // Феникс: один раз вытаскивает из проигрыша вместо game over
+    if (this.player.traitId === "phoenix" && !this.player.flags.revived) {
+      const p = this.player;
+      p.flags.revived = true;
+      if (p.money < -20) p.money = 3;
+      if (p.nerves >= 100) p.nerves = 60;
+      if (p.health <= 0) p.health = 40;
+      if (p.shadow >= 100) p.shadow = 60;
+      if (p.reputation <= -40) p.reputation = -10;
+      if (p.workLife <= 0) p.workLife = 30;
+      if (p.karma <= -70) p.karma = -40;
+      p.queue.unshift(this.phoenixBeat(rule.title));
+      this.phase = "beat";
+      return false;
     }
-    return false;
+    this.player.flags.lossReason = rule.title;
+    this.player.flags.lossDesc = rule.desc;
+    this.phase = "ending";
+    return true;
   }
 
   getBeatMiniGame(): MiniGame | null {
@@ -190,8 +225,10 @@ export class GameEngine {
 
   private advisorLinesFor(type: ChoiceType, anna?: string, max?: string): AdvisorLine[] {
     const d = loyaltyDelta[type];
-    this.player.annaLoyalty = clamp(this.player.annaLoyalty + d.anna, 0, 100);
-    this.player.maxLoyalty = clamp(this.player.maxLoyalty + d.max, 0, 100);
+    const lf = this.player.traitId === "empathy" ? 1.5 : 1; // эмпатия: лояльность растёт быстрее
+    const amp = (v: number) => (v > 0 ? Math.round(v * lf) : v);
+    this.player.annaLoyalty = clamp(this.player.annaLoyalty + amp(d.anna), 0, 100);
+    this.player.maxLoyalty = clamp(this.player.maxLoyalty + amp(d.max), 0, 100);
     const lines: AdvisorLine[] = [];
     if (anna) lines.push({ who: "anna", text: anna });
     else lines.push({ who: "anna", text: pick(advisorsData.anna.reactions[type]) });
@@ -345,7 +382,8 @@ export class GameEngine {
       return { action, minigame: false, hiring: true };
     }
     const action = BUSINESS_ACTIONS.find((a) => a.id === actionId) ?? BUSINESS_ACTIONS[BUSINESS_ACTIONS.length - 1];
-    if (action.cost) this.player.money -= action.cost;
+    const cost = this.player.traitId === "charisma" ? Math.round(action.cost * 0.8) : action.cost; // обаяние: скидка 20%
+    if (cost) this.player.money -= cost;
     if (action.workLife) this.player = applyEffects(this.player, { workLife: action.workLife });
     if (action.minigame && this.getMiniGame()) {
       this.phase = "minigame";

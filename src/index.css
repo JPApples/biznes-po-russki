@@ -1692,3 +1692,6 @@ html, body { overflow-x: hidden; }
 
 .cc-tile:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
 .cc-tile.active { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), 0 8px 22px -8px var(--accent); }
+
+/* +5% global element scale (fills empty space) */
+#root { zoom: 1.05; }

@@ -39,7 +39,13 @@ export function createPlayer(origin: Origin, spec: Specialization, trait: Trait)
 }
 
 /** Apply card/choice effects to a player (mutates a copy and returns it). */
-export function applyEffects(p: PlayerState, e: Effects): PlayerState {
+export function applyEffects(p: PlayerState, e0: Effects): PlayerState {
+  // ── trait mechanics that reshape incoming effects ──
+  const e: Effects = { ...e0 };
+  if (p.traitId === "empathy" && e.reputation && e.reputation < 0) e.reputation = Math.round(e.reputation / 2); // клиенты прощают
+  if (p.traitId === "charisma" && e.reputation && e.reputation > 0) e.reputation = Math.round(e.reputation * 1.2); // блестящие выступления
+  if (p.traitId === "workaholic" && e.nerves && e.nerves > 0) e.nerves = e.nerves * 2; // стресс растёт вдвое
+
   const repMul = typeof p.flags.repMultiplier === "number" ? (p.flags.repMultiplier as number) : 1;
   const next: PlayerState = { ...p };
   if (e.money !== undefined) next.money = next.money + e.money;

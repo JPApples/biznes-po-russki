@@ -31,12 +31,14 @@ const SPEC_DETAILS: Record<string, { icon: any; color: string }> = {
 };
 
 // Renders the mini-game it is given (spec-appropriate game comes from the caller).
-export default function MiniGame({ mg, specId = "it", onDone }: { mg: MG; specId?: string; onDone: (correct: boolean) => void }) {
+// showAnswer (perk «Интуиция» / «Железная логика») reveals the correct/wrong marking.
+export default function MiniGame({ mg, specId = "it", traitId, onDone }: { mg: MG; specId?: string; traitId?: string; onDone: (correct: boolean) => void }) {
+  const showAnswer = traitId === "intuition" || traitId === "iron_logic";
   switch (mg.type) {
-    case "order": return <OrderGame mg={mg} specId={specId} onDone={onDone} />;
-    case "quiz": return <QuizGame mg={mg} specId={specId} onDone={onDone} />;
-    case "slider": return <SliderGame mg={mg} specId={specId} onDone={onDone} />;
-    default: return <SelectGame mg={mg} specId={specId} onDone={onDone} />;
+    case "order": return <OrderGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
+    case "quiz": return <QuizGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
+    case "slider": return <SliderGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
+    default: return <SelectGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
   }
 }
 
@@ -70,7 +72,7 @@ function finish(
 }
 
 /* ---------- ORDER: tap items to build the correct sequence ---------- */
-function OrderGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c: boolean) => void }) {
+function OrderGame({ mg, specId, showAnswer, onDone }: { mg: MG; specId: string; showAnswer: boolean; onDone: (c: boolean) => void }) {
   const [seq, setSeq] = useState<string[]>([]);
   const [result, setResult] = useState<Result>("none");
   const [checking, setChecking] = useState(false);
@@ -136,7 +138,7 @@ function OrderGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c:
       {checking && <Loader specId={specId} />}
 
       {/* Feedback Panel */}
-      {!checking && <Feedback result={result} correctText={mg.correct.join(" → ")} onContinue={() => onDone(false)} />}
+      {!checking && <Feedback result={result} showAnswer={showAnswer} correctText={mg.correct.join(" → ")} onContinue={() => onDone(false)} />}
 
       {/* Action buttons */}
       {!locked && (
@@ -155,7 +157,7 @@ function OrderGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c:
 }
 
 /* ---------- SELECT: toggle the correct set of items ---------- */
-function SelectGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c: boolean) => void }) {
+function SelectGame({ mg, specId, showAnswer, onDone }: { mg: MG; specId: string; showAnswer: boolean; onDone: (c: boolean) => void }) {
   const [sel, setSel] = useState<string[]>([]);
   const [result, setResult] = useState<Result>("none");
   const [checking, setChecking] = useState(false);
@@ -192,7 +194,7 @@ function SelectGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c
       <div className="mg-chips">
         {mg.items.map((item) => {
           const active = sel.includes(item);
-          const reveal = locked && correctSet.has(item);
+          const reveal = showAnswer && locked && correctSet.has(item);
           return (
             <button 
               key={item} 
@@ -210,7 +212,7 @@ function SelectGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c
       {checking && <Loader specId={specId} />}
 
       {/* Feedback Panel */}
-      {!checking && <Feedback result={result} correctText={mg.correct.join(", ")} onContinue={() => onDone(false)} />}
+      {!checking && <Feedback result={result} showAnswer={showAnswer} correctText={mg.correct.join(", ")} onContinue={() => onDone(false)} />}
 
       {/* Action buttons */}
       {!locked && (
@@ -229,7 +231,7 @@ function SelectGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c
 }
 
 /* ---------- QUIZ: pick the single correct answer (fast genre) ---------- */
-function QuizGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c: boolean) => void }) {
+function QuizGame({ mg, specId, showAnswer, onDone }: { mg: MG; specId: string; showAnswer: boolean; onDone: (c: boolean) => void }) {
   const [sel, setSel] = useState<string | null>(null);
   const [result, setResult] = useState<Result>("none");
   const [checking, setChecking] = useState(false);
@@ -258,8 +260,8 @@ function QuizGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c: 
       <div className="mg-chips">
         {mg.items.map((opt) => {
           const isSel = sel === opt;
-          const reveal = locked && opt === answer;
-          const wrong = locked && isSel && opt !== answer;
+          const reveal = showAnswer && locked && opt === answer;
+          const wrong = showAnswer && locked && isSel && opt !== answer;
           return (
             <button key={opt} disabled={locked}
               className={"mg-chip toggle" + (isSel ? " active" : "") + (reveal ? " reveal" : "") + (wrong ? " wrong" : "")}
@@ -270,13 +272,13 @@ function QuizGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c: 
         })}
       </div>
       {checking && <Loader specId={specId} />}
-      {!checking && <Feedback result={result} correctText={answer} onContinue={() => onDone(false)} />}
+      {!checking && <Feedback result={result} showAnswer={showAnswer} correctText={answer} onContinue={() => onDone(false)} />}
     </div>
   );
 }
 
 /* ---------- SLIDER: drag the value into the correct range ---------- */
-function SliderGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c: boolean) => void }) {
+function SliderGame({ mg, specId, showAnswer, onDone }: { mg: MG; specId: string; showAnswer: boolean; onDone: (c: boolean) => void }) {
   const min = mg.min ?? 0;
   const max = mg.max ?? 100;
   const [lo, hi] = mg.target ?? [min, max];
@@ -313,7 +315,7 @@ function SliderGame({ mg, specId, onDone }: { mg: MG; specId: string; onDone: (c
         <span>{min}{unit}</span><span>{max}{unit}</span>
       </div>
       {checking && <Loader specId={specId} />}
-      {!checking && <Feedback result={result} correctText={`${lo}–${hi}${unit}`} onContinue={() => onDone(false)} />}
+      {!checking && <Feedback result={result} showAnswer={showAnswer} correctText={`${lo}–${hi}${unit}`} onContinue={() => onDone(false)} />}
 
       {!locked && (
         <button className="btn" style={{ marginTop: 16 }} onClick={check}>
@@ -343,7 +345,7 @@ function Loader({ specId }: { specId: string }) {
 }
 
 // Feedback Panel with Lucide check/x indicators
-function Feedback({ result, correctText, onContinue }: { result: Result; correctText: string; onContinue?: () => void }) {
+function Feedback({ result, correctText, showAnswer, onContinue }: { result: Result; correctText: string; showAnswer?: boolean; onContinue?: () => void }) {
   if (result === "none") return null;
   if (result === "ok") {
     return (
@@ -363,7 +365,7 @@ function Feedback({ result, correctText, onContinue }: { result: Result; correct
         <div>
           <p className="font-extrabold text-white text-sm">Увы, ошибка в схеме!</p>
           <p className="text-gray-300 text-xs mt-0.5">
-            Вы завалили тест качества. Правильно: <b className="text-rose-300">{correctText}</b>.
+            Вы завалили тест качества.{showAnswer && <> Правильно: <b className="text-rose-300">{correctText}</b>.</>}
           </p>
         </div>
       </div>
