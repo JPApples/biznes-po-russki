@@ -692,6 +692,43 @@ function Frame({
 
         {/* Dynamic Analytics SVG curves chart */}
         <IndicatorChart p={p} />
+
+        {/* Rotating business tip — fills space + nudges the player like a textbook */}
+        <TipBox p={p} />
+      </div>
+    </div>
+  );
+}
+
+const TIPS: string[] = [
+  "Раздели личный и бизнес-счёт — налоговая это любит, а ты не запутаешься.",
+  "Чек через «Мой налог» за пару секунд экономит штраф в тысячи.",
+  "Тень закона копится тихо, а проверка приходит внезапно. Держи её низкой.",
+  "Здоровье и энергия — твой главный актив. Без них бизнеса не будет.",
+  "Баланс работы и жизни на нуле = выгорание. Отдых это инвестиция.",
+  "Репутация — множитель выручки. Один честный чек работает на тебя годами.",
+  "Карма в плюсе открывает бонусы. Помогай и будь честным — это окупается.",
+  "Дешёвый обед на бегу бьёт по здоровью. Иногда выгоднее поесть нормально.",
+  "Бар до утра весел сегодня — и дорог завтра. Считай последствия.",
+  "Не гонись за быстрым налом без чека: это отложенный штраф.",
+  "Слабый рубль — дороже импорт. Следи за курсами, планируй закупки.",
+  "Постоянный клиент со скидкой надёжнее разового на полную цену.",
+];
+
+function TipBox({ p }: { p: PlayerState }) {
+  const idx = ((p.month - 1) * 28 + (p.week - 1) * 7 + p.beatIndex) % TIPS.length;
+  const moodAnna = p.annaLoyalty >= 60 ? "довольна" : p.annaLoyalty <= 40 ? "встревожена" : "нейтральна";
+  const moodMax = p.maxLoyalty >= 60 ? "в ударе" : p.maxLoyalty <= 40 ? "ворчит" : "спокоен";
+  return (
+    <div className="glass-panel rounded-2xl border border-white/5 p-4 relative overflow-hidden">
+      <div className="absolute -top-6 -right-6 w-20 h-20 bg-amber-400/10 blur-2xl rounded-full pointer-events-none" />
+      <h5 className="font-bold text-[11px] uppercase tracking-wider text-gray-300 mb-2 flex items-center gap-2 select-none">
+        <span className="text-amber-300">💡</span> Совет дня
+      </h5>
+      <p className="text-xs text-gray-200 leading-relaxed border-t border-gray-800/60 pt-2">{TIPS[idx]}</p>
+      <div className="mt-3 flex items-center justify-between text-[10px] font-bold border-t border-gray-800/40 pt-2">
+        <span className="text-sky-400">Анна: {moodAnna}</span>
+        <span className="text-orange-400">Макс: {moodMax}</span>
       </div>
     </div>
   );
