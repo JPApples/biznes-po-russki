@@ -1,0 +1,58 @@
+{
+  "_note": "AI groundwork: добавляй сюда объекты формата Beat (как в month1.json events[]). Движок берёт их в random-пул.",
+  "random": [
+    {
+      "id": "rnd_client", "kind": "choice", "day": 0, "dow": "Внезапно", "icon": "phone",
+      "title": "Неожиданный клиент",
+      "text": "Незнакомец нашёл тебя по сарафану и хочет заказ уже сегодня.",
+      "choices": [
+        { "id": "A", "text": "Взять и сделать качественно", "type": "reliable", "effects": { "money": 8, "reputation": 6, "energy": -6 }, "outcome": "Быстрый чистый заказ — приятно.", "anna": "Вот так и растёт база клиентов." },
+        { "id": "B", "text": "Отказать — не до того", "type": "situational", "effects": { "nerves": -3 }, "outcome": "Сберёг силы, но упустил деньги.", "max": "Эх, деньги мимо!" }
+      ]
+    },
+    {
+      "id": "rnd_break", "kind": "choice", "day": 0, "dow": "Внезапно", "icon": "danger",
+      "title": "Поломка",
+      "text": "Сломалось то, без чего не поработать.",
+      "choices": [
+        { "id": "A", "text": "Починить сразу", "type": "reliable", "effects": { "money": -6, "energy": -4 }, "outcome": "Дорого, но работа не встала.", "anna": "Резерв на ремонт — обязателен." },
+        { "id": "B", "text": "Забить, работать как есть", "type": "harmful", "effects": { "reputation": -6, "nerves": 6 }, "outcome": "Качество просело, клиенты заметили." }
+      ]
+    },
+    {
+      "id": "rnd_sick", "kind": "choice", "day": 0, "dow": "Внезапно", "icon": "danger",
+      "title": "Простуда",
+      "text": "Тебя продуло. Голова чугунная, нос течёт.",
+      "choices": [
+        { "id": "A", "text": "Отлежаться день", "type": "reliable", "effects": { "health": 10, "energy": 8, "money": -2 }, "outcome": "Восстановился, потерял немного дохода.", "anna": "Здоровье — твой главный актив." },
+        { "id": "B", "text": "Работать через силу", "type": "harmful", "effects": { "health": -12, "energy": -10, "money": 4 }, "next": { "health": -6 }, "nextText": "Разболелся сильнее — завтра тяжело.", "outcome": "Заработал, но слёг крепче." }
+      ]
+    },
+    {
+      "id": "rnd_refund", "kind": "choice", "day": 0, "dow": "Внезапно", "icon": "cash",
+      "title": "Возврат переплаты",
+      "text": "Налоговая вернула переплату — приятный сюрприз.",
+      "choices": [
+        { "id": "A", "text": "Отлично!", "type": "reliable", "effects": { "money": 6, "nerves": -4 }, "outcome": "+6$ на счёт ни за что." }
+      ]
+    },
+    {
+      "id": "rnd_loan", "kind": "choice", "day": 0, "dow": "Внезапно", "icon": "heart",
+      "title": "Друг просит в долг",
+      "text": "Друг попал в трудную ситуацию и просит занять.",
+      "choices": [
+        { "id": "A", "text": "Помочь", "type": "reliable", "effects": { "money": -5, "karma": 5 }, "outcome": "Доброе дело. Карма +5.", "anna": "Хорошо, если самому хватает." },
+        { "id": "B", "text": "Отказать", "type": "situational", "effects": { "karma": -2 }, "outcome": "Деньги целы, но осадок остался." }
+      ]
+    },
+    {
+      "id": "rnd_viral", "kind": "choice", "day": 0, "dow": "Внезапно", "icon": "megaphone",
+      "title": "Пост завирусился",
+      "text": "Твой пост неожиданно разлетелся по сети.",
+      "choices": [
+        { "id": "A", "text": "Поймать волну, ответить всем", "type": "reliable", "effects": { "reputation": 10, "energy": -6 }, "outcome": "Репутация взлетела!", "max": "Вот это хайп, лови момент!" },
+        { "id": "B", "text": "Не отвлекаться от дел", "type": "situational", "effects": { "reputation": 3 }, "outcome": "Чуть-чуть, но без суеты." }
+      ]
+    }
+  ]
+}

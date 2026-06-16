@@ -1,0 +1,65 @@
+{
+  "1": {
+    "events": [
+      {
+        "id": "E1_01",
+        "title": "Предложение знакомого",
+        "text": "Старый друг звонит: «Слышал, ты решил заняться бизнесом! У меня есть заказ. Сделаешь? Плачу наличными, договор не нужен».",
+        "choices": [
+          { "id": "A", "text": "Согласиться — деньги сейчас", "type": "harmful", "effects": { "money": 5, "shadow": 20, "karma": -3 } },
+          { "id": "B", "text": "Сначала зарегистрироваться", "type": "reliable", "effects": { "karma": 3 }, "bonus": "Законопослушный старт: +5% к выручке на 3 мес." },
+          { "id": "C", "text": "Предложить бартер", "type": "secret", "effects": { "karma": 4 }, "partner": true }
+        ]
+      }
+    ],
+    "checklist": null
+  },
+  "2": {
+    "events": [
+      {
+        "id": "E1_04",
+        "title": "Первый клиент официально",
+        "text": "Тот самый друг возвращается: «ИП открыл? Давай по-взрослому — договор и чек».",
+        "choices": [
+          { "id": "A", "text": "Подписать договор, выдать чек", "type": "reliable", "effects": { "money": 10, "reputation": 10, "karma": 3 }, "bonus": "+5% к выручке на 3 мес." },
+          { "id": "B", "text": "Договор есть, чек выпишу позже", "type": "situational", "effects": { "money": 10, "shadow": 10, "karma": -1 } },
+          { "id": "C", "text": "Сделать по-дружбе, без бумаг", "type": "harmful", "effects": { "money": 8, "shadow": 25, "karma": -4 } }
+        ]
+      }
+    ],
+    "checklist": {
+      "id": "E1_05",
+      "title": "Чек-лист: чек",
+      "text": "Клиент оплатил переводом на карту. Что выдаёшь?",
+      "choices": [
+        { "id": "A", "text": "Ничего", "type": "harmful", "effects": { "shadow": 20, "karma": -3 } },
+        { "id": "B", "text": "Чек из «Мой налог»", "type": "reliable", "effects": { "karma": 2 } },
+        { "id": "C", "text": "Расписку от руки", "type": "situational", "effects": { "shadow": 10, "karma": -1 } }
+      ]
+    }
+  },
+  "3": {
+    "events": [
+      {
+        "id": "E1_06",
+        "title": "Испытание прибылью",
+        "text": "Новый клиент хочет крупный заказ за наличные без чека. Сумма приятная, но рискованная.",
+        "choices": [
+          { "id": "A", "text": "Согласиться (14$ наличными)", "type": "harmful", "effects": { "money": 14, "shadow": 40, "karma": -5 } },
+          { "id": "B", "text": "Только официально (скидка 10%)", "type": "reliable", "effects": { "money": 18, "reputation": 15, "karma": 4 } },
+          { "id": "C", "text": "Предложить бартер", "type": "secret", "effects": { "reputation": 10, "karma": 5 }, "partner": true }
+        ]
+      },
+      {
+        "id": "E1_07",
+        "title": "Первая декларация",
+        "text": "Конец квартала. Пора подавать декларацию в налоговую.",
+        "choices": [
+          { "id": "A", "text": "Подать честную", "type": "reliable", "effects": { "reputation": 5, "karma": 5 }, "bonus": "+10% к доходам на 3 мес." },
+          { "id": "B", "text": "Занизить доход", "type": "harmful", "effects": { "shadow": 30, "karma": -8 } }
+        ]
+      }
+    ],
+    "checklist": null
+  }
+}

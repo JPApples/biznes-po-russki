@@ -1,0 +1,12 @@
+[
+  {"id": "maria", "name": "Мария, 35 лет", "emoji": "👩‍💼", "salary": 4, "signing_bonus": 5, "skills": 90, "loyalty": 60, "special": "Опытный специалист. Не ошибается.", "description": "Работала в крупной компании 10 лет."},
+  {"id": "oleg", "name": "Олег, 22 года", "emoji": "👨‍🎓", "salary": 2, "signing_bonus": 1, "skills": 30, "loyalty": 80, "special": "Зелёный новичок. Учится.", "description": "Вчерашний студент. Горящие глаза."},
+  {"id": "svetlana", "name": "Светлана, удалёнщик", "emoji": "👩‍💻", "salary": 3, "signing_bonus": 3, "skills": 75, "loyalty": 65, "special": "Работает удалённо.", "description": "Опытный ассистент на удалёнке."},
+  {"id": "dmitry", "name": "Дмитрий, свой парень", "emoji": "🧔", "salary": 3, "signing_bonus": 0, "skills": 60, "loyalty": 70, "special": "Обидчивый. При обиде уходит.", "description": "Старый знакомый. Просится в команду."},
+  {"id": "elena", "name": "Елена, самозанятая", "emoji": "👩‍🔧", "salary": 0, "signing_bonus": 0, "skills": 80, "loyalty": 40, "special": "Оплата 30% от сделки. Может отказаться.", "description": "Фрилансер. Налоги платит сама."},
+  {"id": "artem", "name": "Артём, маркетолог", "emoji": "📈", "salary": 3, "signing_bonus": 4, "skills": 80, "loyalty": 55, "special": "+30% к рекламе.", "description": "Креативный маркетолог."},
+  {"id": "olga", "name": "Ольга, бухгалтер", "emoji": "🧾", "salary": 3, "signing_bonus": 3, "skills": 95, "loyalty": 70, "special": "Убирает ошибки в отчётах.", "description": "Бухгалтер с 20-летним стажем."},
+  {"id": "sergey", "name": "Сергей, снабженец", "emoji": "📦", "salary": 3, "signing_bonus": 3, "skills": 85, "loyalty": 60, "special": "Скидки на закупки 10%.", "description": "Знает всех поставщиков."},
+  {"id": "igor", "name": "Игорь, бывший коллега", "emoji": "⚖️", "salary": 4, "signing_bonus": 2, "skills": 90, "loyalty": 75, "special": "+20% к Юрзащите.", "description": "Бывший сослуживец. Знает законы."},
+  {"id": "alena", "name": "Алёна, мама из чата", "emoji": "👩‍👧", "salary": 2, "signing_bonus": 0, "skills": 65, "loyalty": 90, "special": "Лояльность макс. Может уйти в декрет.", "description": "Такая же мама. Ищет подработку."}
+]

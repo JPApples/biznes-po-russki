@@ -1,0 +1,9 @@
+[
+  { "id": "retail", "name": "Розничная торговля", "emoji": "🏪", "baseRevenue": 12, "multiplier": 1.5, "needsOffice": true },
+  { "id": "services", "name": "Услуги", "emoji": "🛠️", "baseRevenue": 10, "multiplier": 2.0, "needsOffice": false },
+  { "id": "it", "name": "IT и разработка", "emoji": "💻", "baseRevenue": 8, "multiplier": 3.5, "needsOffice": false },
+  { "id": "catering", "name": "Общепит", "emoji": "🍽️", "baseRevenue": 15, "multiplier": 1.8, "needsOffice": true },
+  { "id": "education", "name": "Инфобизнес", "emoji": "📚", "baseRevenue": 10, "multiplier": 3.0, "needsOffice": false },
+  { "id": "production", "name": "Производство", "emoji": "🏭", "baseRevenue": 10, "multiplier": 2.5, "needsOffice": true },
+  { "id": "agriculture", "name": "Сельское хозяйство", "emoji": "🌾", "baseRevenue": 8, "multiplier": 1.5, "needsOffice": false }
+]

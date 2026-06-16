@@ -1,0 +1,10 @@
+[
+  { "id": "office_worker", "name": "Офисный винтик", "emoji": "💼", "money": 50, "time": 8, "nerves": 70, "reputation": 5, "workLife": 70, "feature": "Стабильный, но без козырей", "flags": { "lawKnowledge": "low" } },
+  { "id": "student", "name": "Студент-энтузиаст", "emoji": "🎓", "money": 10, "time": 10, "nerves": 100, "reputation": 0, "workLife": 80, "feature": "Игнорирует выгорание 6 мес.", "flags": { "ignoreBurnout": 6 } },
+  { "id": "craftsman", "name": "Мастер на все руки", "emoji": "🔧", "money": 5, "time": 9, "nerves": 80, "reputation": 10, "workLife": 75, "feature": "Есть оборудование", "flags": { "hasEquipment": true } },
+  { "id": "parent", "name": "Родитель в декрете", "emoji": "👶", "money": 20, "time": 6, "nerves": 60, "reputation": 15, "workLife": 50, "feature": "Скидка на соцвзносы", "flags": { "socialDiscount": 0.5 } },
+  { "id": "ex_officer", "name": "Бывший силовик", "emoji": "🛡️", "money": 70, "time": 7, "nerves": 80, "reputation": 20, "workLife": 65, "feature": "Знает законы идеально", "flags": { "lawKnowledge": "perfect" } },
+  { "id": "freelancer", "name": "Творческий фрилансер", "emoji": "🎨", "money": 15, "time": 10, "nerves": 90, "reputation": 10, "workLife": 75, "feature": "Множитель репутации ×1.5", "flags": { "repMultiplier": 1.5 } },
+  { "id": "migrant", "name": "Мигрант с деньгами", "emoji": "🌍", "money": 80, "time": 8, "nerves": 60, "reputation": -10, "workLife": 60, "feature": "Языковой барьер", "flags": { "languageBarrier": true } },
+  { "id": "heir", "name": "Наследник", "emoji": "🏛️", "money": 30, "time": 7, "nerves": 50, "reputation": -5, "workLife": 55, "feature": "Есть бизнес, но с долгами", "flags": { "hasBusiness": true, "inheritedDebt": 5 } }
+]
