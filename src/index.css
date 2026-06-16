@@ -1673,3 +1673,22 @@ html, body { overflow-x: hidden; }
   border-radius: 8px;
 }
 .icon-btn:hover { background: rgba(255, 255, 255, 0.07); transform: none; }
+
+/* #4 character-creation: step segments, running summary, stronger select/hover */
+.cc-steps { display: flex; gap: 5px; align-items: center; }
+.cc-step-seg { width: 26px; height: 5px; border-radius: 99px; background: rgba(255,255,255,0.1); transition: all .3s; }
+.cc-step-seg.done { background: #6366f1; }
+.cc-step-seg.on { background: #a5b4fc; box-shadow: 0 0 8px rgba(165,180,252,0.7); width: 34px; }
+
+.cc-summary { display: flex; flex-wrap: wrap; gap: 6px; }
+.cc-sum-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 800; color: #c7d2fe;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.28);
+  border-radius: 99px; padding: 4px 10px;
+}
+.cc-sum-chip svg { width: 13px; height: 13px; }
+.cc-sum-chip.pending { color: #6b7280; background: transparent; border-style: dashed; border-color: rgba(255,255,255,0.12); }
+
+.cc-tile:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+.cc-tile.active { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), 0 8px 22px -8px var(--accent); }

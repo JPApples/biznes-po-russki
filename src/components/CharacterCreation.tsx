@@ -217,8 +217,21 @@ export default function CharacterCreation({
         <button className="icon-btn" onClick={back} title="Назад">
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <span className="badge">Шаг {step + 1} из 4</span>
+        <div className="cc-steps" title={`Шаг ${step + 1} из 4`}>
+          {[0, 1, 2, 3].map((i) => (
+            <span key={i} className={"cc-step-seg" + (i < step ? " done" : i === step ? " on" : "")} />
+          ))}
+        </div>
       </div>
+
+      {/* Running build-so-far summary (steps after the first pick) */}
+      {step > 0 && step < 3 && (
+        <div className="cc-summary fade-in">
+          {origin && <span className="cc-sum-chip">{icon(origin.id, origin.emoji)}<span>{origin.name}</span></span>}
+          {spec && <span className="cc-sum-chip">{icon(spec.id, spec.emoji)}<span>{spec.name}</span></span>}
+          {!trait && <span className="cc-sum-chip pending">{step === 1 ? "→ сфера" : "→ черта"}</span>}
+        </div>
+      )}
 
       {step === 0 && (
         <div className="phase-anim flex flex-col gap-3">
