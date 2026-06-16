@@ -1640,3 +1640,12 @@ html, body { overflow-x: hidden; }
   .sky-blink2 { animation: skyBlink 2.4s ease-in-out 1.2s infinite; }
 }
 @keyframes skyBlink { 0%,100% { opacity: 1 } 50% { opacity: 0.12 } }
+
+/* #2 metric-card mini level bar inside each resource chip */
+.res.has-bar { padding-bottom: 11px; }
+.res-bar {
+  position: absolute; left: 8px; right: 8px; bottom: 4px; height: 3px;
+  background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden;
+}
+.res-bar > i { display: block; height: 100%; border-radius: 2px; transition: width .5s ease; }
+@media (min-width: 1024px) { .res.has-bar { padding-bottom: 12px !important; } }
