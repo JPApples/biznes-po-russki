@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MiniGame as MG } from "../engine/types";
+import { sfx } from "../game/sound";
 import {
   Laptop, GraduationCap, Factory, Utensils,
   ShoppingCart, Scissors, Sprout, CheckCircle2,
@@ -38,8 +39,56 @@ export default function MiniGame({ mg, specId = "it", traitId, onDone }: { mg: M
     case "order": return <OrderGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
     case "quiz": return <QuizGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
     case "slider": return <SliderGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
+    case "drag": return <DragGame mg={mg} onDone={onDone} />;
     default: return <SelectGame mg={mg} specId={specId} showAnswer={showAnswer} onDone={onDone} />;
   }
+}
+
+/* ---------- DRAG: drag (or tap) items onto a target — coffee/lunch/bar moments ---------- */
+function DragGame({ mg, onDone }: { mg: MG; onDone: (c: boolean) => void }) {
+  const [placed, setPlaced] = useState<number[]>([]);
+  const [over, setOver] = useState(false);
+  const targetGlyph = mg.correct[0] || "🎯";
+  const isBar = /бар|чока|🍺|🥂/i.test(mg.name + mg.prompt);
+  const allDone = placed.length >= mg.items.length;
+
+  const place = (i: number) => {
+    if (placed.includes(i) || allDone) return;
+    const np = [...placed, i];
+    setPlaced(np);
+    if (isBar) sfx.clink(); else sfx.sip();
+    if (np.length >= mg.items.length) setTimeout(() => onDone(true), 700);
+  };
+
+  return (
+    <div className="card fade-in mg glow-indigo">
+      <div className="card-title text-sm md:text-base mb-1">{mg.name}</div>
+      <p className="card-text text-gray-300 font-medium mb-3">{mg.prompt}</p>
+      <div className="dnd-scene">
+        <div className="dnd-items">
+          {mg.items.map((it, i) => (
+            placed.includes(i) ? null : (
+              <div key={i} className="dnd-item" draggable
+                onDragStart={(e) => e.dataTransfer.setData("text", String(i))}
+                onClick={() => place(i)}
+                title="Перетащи или тапни">
+                {it}
+              </div>
+            )
+          ))}
+          {allDone && <span className="text-xs text-emerald-400 font-bold">Готово!</span>}
+        </div>
+        <div className={"dnd-target" + (over ? " over" : "") + (allDone ? " full" : "")}
+          onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+          onDragLeave={() => setOver(false)}
+          onDrop={(e) => { e.preventDefault(); setOver(false); const i = Number(e.dataTransfer.getData("text")); if (!Number.isNaN(i)) place(i); }}>
+          <span className="dnd-target-glyph">{targetGlyph}</span>
+          <span className="dnd-count">{placed.length}/{mg.items.length}</span>
+        </div>
+      </div>
+      <p className="muted text-[11px] mt-2">Перетащи элементы на цель (или просто тапни).</p>
+    </div>
+  );
 }
 
 // Indirect hint from Anna — a nudge + where to look, never the literal answer.

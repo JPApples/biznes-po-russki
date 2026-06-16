@@ -1695,3 +1695,26 @@ html, body { overflow-x: hidden; }
 
 /* +5% global element scale (fills empty space) */
 #root { zoom: 1.05; }
+
+/* Drag-and-drop mini-game (coffee/bar moments) */
+.dnd-scene { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 4px; }
+.dnd-items { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; min-height: 56px; }
+.dnd-item {
+  font-size: 34px; line-height: 1; cursor: grab; user-select: none;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+  transition: transform .15s; animation: dndFloat 2.6s ease-in-out infinite;
+}
+.dnd-item:hover { transform: scale(1.18) rotate(-4deg); }
+.dnd-item:active { cursor: grabbing; }
+.dnd-target {
+  width: 96px; height: 96px; flex-shrink: 0; border-radius: 18px;
+  border: 2px dashed rgba(165,180,252,0.4); background: rgba(99,102,241,0.06);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  transition: all .2s;
+}
+.dnd-target.over { border-color: #a5b4fc; background: rgba(99,102,241,0.16); transform: scale(1.05); }
+.dnd-target.full { border-style: solid; border-color: #34d399; background: rgba(16,185,129,0.12); }
+.dnd-target-glyph { font-size: 40px; line-height: 1; }
+.dnd-count { font-size: 11px; font-weight: 800; color: #9ca3af; font-family: ui-monospace, monospace; }
+@media (prefers-reduced-motion: reduce) { .dnd-item { animation: none; } }
+@keyframes dndFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }

@@ -142,7 +142,7 @@ export interface KarmaLevel {
 export interface MiniGame {
   id?: string;
   name: string;
-  type: "order" | "select" | "quiz" | "slider";
+  type: "order" | "select" | "quiz" | "slider" | "drag";
   prompt: string;
   items: string[];
   correct: string[];
