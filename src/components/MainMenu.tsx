@@ -66,18 +66,23 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
       vx: number;
       vy: number;
       size: number;
+      rot: number;
+      vrot: number;
 
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
-        this.vx = (Math.random() - 0.5) * 0.7;
-        this.vy = (Math.random() - 0.5) * 0.7;
-        this.size = Math.random() * 2.5 + 1.2;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5 - 0.1; // slight upward drift, like floating cash
+        this.size = Math.random() * 1.6 + 1.1;
+        this.rot = Math.random() * Math.PI * 2;
+        this.vrot = (Math.random() - 0.5) * 0.02;
       }
 
       update() {
         this.x += this.vx;
         this.y += this.vy;
+        this.rot += this.vrot;
 
         if (this.x < 0 || this.x > width) this.vx *= -1;
         if (this.y < 0 || this.y > height) this.vy *= -1;
@@ -96,10 +101,24 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
 
       draw() {
         if (!ctx) return;
+        const w = this.size * 7;
+        const h = this.size * 3.2;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rot);
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(129, 140, 248, 0.45)";
+        ctx.roundRect(-w / 2, -h / 2, w, h, 1.6);
+        ctx.fillStyle = "rgba(52, 211, 153, 0.45)";
         ctx.fill();
+        ctx.lineWidth = 0.6;
+        ctx.strokeStyle = "rgba(16, 185, 129, 0.65)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(4, 30, 22, 0.85)";
+        ctx.font = `${Math.round(h * 0.78)}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("₽", 0, 0.5);
+        ctx.restore();
       }
     }
 
@@ -110,29 +129,10 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
     let animationId = 0;
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dist = Math.hypot(
-            particles[i].x - particles[j].x,
-            particles[i].y - particles[j].y
-          );
-          if (dist < 80) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(139, 92, 246, ${0.12 * (1 - dist / 80)})`;
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-          }
-        }
-      }
-
       particles.forEach((p) => {
         p.update();
         p.draw();
       });
-
       animationId = requestAnimationFrame(animate);
     };
 
