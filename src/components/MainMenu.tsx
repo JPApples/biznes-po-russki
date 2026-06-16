@@ -154,6 +154,29 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
         className="fixed inset-0 w-screen h-screen z-0 opacity-45" style={{ pointerEvents: "none" }}
       />
 
+      {/* City-skyline horizon — anchors the composition so the screen isn't an empty void */}
+      <div className="menu-skyline" aria-hidden="true">
+        <svg viewBox="0 0 600 200" preserveAspectRatio="xMidYMax slice" width="100%" height="100%">
+          <defs>
+            <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#222c52" /><stop offset="1" stopColor="#0a0e1c" />
+            </linearGradient>
+          </defs>
+          <path fill="url(#skyg)" d="M0 200 V150 H45 V110 H90 V160 H135 V90 H180 V130 H225 V60 H270 V120 H315 V100 H360 V70 H405 V125 H450 V95 H495 V145 H540 V105 H585 V140 H600 V200 Z" />
+          <g fill="#fbbf24" opacity="0.6">
+            <rect x="12" y="162" width="5" height="7" /><rect x="28" y="162" width="5" height="7" /><rect x="12" y="178" width="5" height="7" />
+            <rect x="146" y="104" width="5" height="7" /><rect x="162" y="104" width="5" height="7" /><rect x="146" y="126" width="5" height="7" /><rect x="162" y="148" width="5" height="7" />
+            <rect x="236" y="74" width="5" height="7" /><rect x="252" y="74" width="5" height="7" /><rect x="236" y="98" width="5" height="7" /><rect x="252" y="120" width="5" height="7" /><rect x="236" y="142" width="5" height="7" />
+            <rect x="326" y="114" width="5" height="7" /><rect x="342" y="136" width="5" height="7" />
+            <rect x="371" y="84" width="5" height="7" /><rect x="387" y="84" width="5" height="7" /><rect x="371" y="106" width="5" height="7" /><rect x="387" y="128" width="5" height="7" />
+            <rect x="461" y="110" width="5" height="7" /><rect x="477" y="132" width="5" height="7" />
+            <rect x="551" y="120" width="5" height="7" />
+          </g>
+          <circle className="sky-blink" cx="247" cy="52" r="2.2" fill="#f87171" />
+          <circle className="sky-blink2" cx="382" cy="62" r="2.2" fill="#f87171" />
+        </svg>
+      </div>
+
       <div className="relative z-10 w-full flex flex-col items-center">
         {/* Premium glowing logo header */}
         <div className="mb-4 relative">
@@ -233,8 +256,16 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
           </div>
         )}
         
-        <p className="muted text-[10px] font-semibold tracking-wider mt-10 uppercase border-t border-gray-800/40 pt-3 w-full">
-          Версия 0.1
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
+          {["8 происхождений", "7 сфер бизнеса", "выживание и баланс"].map((t) => (
+            <span key={t} className="text-[10px] font-bold tracking-wide text-indigo-300/90 bg-indigo-500/10 border border-indigo-500/25 rounded-full px-2.5 py-1">
+              {t}
+            </span>
+          ))}
+        </div>
+
+        <p className="muted text-[10px] font-semibold tracking-wider mt-5 uppercase border-t border-gray-800/40 pt-3 w-full">
+          Версия 0.1 · Этап 1 · 3 месяца
         </p>
       </div>
     </div>
