@@ -12,9 +12,11 @@ import {
   Users, Phone, FolderOpen, Scale, Utensils, Heart, Handshake,
   Receipt, PartyPopper, AlarmClock, Star, Wallet, Banknote, Flame,
   FileText, Package, MessageSquare, Swords, Landmark, Sparkles, BookOpen,
+  Volume2, VolumeX,
 } from "lucide-react";
 import employeesData from "../data/employees.json";
 import { AdvisorAvatar } from "./Advisors";
+import { sfx, toggleMuted, isMuted } from "../game/sound";
 
 const PHASE_NAME: Record<string, string> = {
   event: "Входящее событие",
@@ -119,6 +121,7 @@ export default function GameScreen({
         <div className="phase-anim" key={"beat-mg" + beat.id}>
           {cons.length > 0 && <ConsequenceBanner cons={cons} />}
           <MiniGame mg={mg} specId={p.specId} traitId={p.traitId} onDone={(correct) => {
+            if (correct) sfx.win(); else sfx.fail();
             const r = engine.resolveBeatMiniGame(correct);
             const eff = correct ? mg.win : mg.lose;
             if (eff) showDelta(eff);
@@ -158,6 +161,10 @@ export default function GameScreen({
             <button key={c.id} className={"choice " + c.type} onClick={() => {
               const r = engine.chooseBeat(c.id);
               if (!r) return;
+              if (beat.kind === "lunch") sfx.sip();
+              else if (beat.kind === "leisure") sfx.clink();
+              else sfx.click();
+              if ((r.choice.effects.money ?? 0) > 0) sfx.cash();
               showDelta(r.choice.effects);
               const note = [
                 r.choice.outcome,
@@ -362,6 +369,7 @@ export default function GameScreen({
     return wrap(
       <div className="phase-anim" key="mg">
         <MiniGame mg={mg} specId={p.specId} traitId={p.traitId} onDone={(correct) => {
+          if (correct) sfx.win(); else sfx.fail();
           engine.processMiniGame(correct);
           if (correct) showDelta({ reputation: 3, karma: 1 });
           onChange();
@@ -510,6 +518,7 @@ function Frame({
     { k: "checklist", label: "Чек" },
     { k: "summary", label: "Итоги" },
   ];
+  const [muted, setMutedUI] = useState(isMuted());
   const active = engine.phase === "minigame" ? "businessPlan" : engine.phase;
   const weekStream = engine.hasWeekStream() && (engine.phase === "beat" || engine.phase === "weekSummary");
   const wk = weekStream ? engine.getWeek() : null;
@@ -593,6 +602,9 @@ function Frame({
             {weekStream ? `Месяц ${p.month} · Неделя ${p.week} · ${wk?.title ?? ""}` : `Месяц ${p.month} · ${PHASE_NAME[engine.phase]}`}
           </span>
           <div className="toolbar">
+            <button className="icon-btn" title={muted ? "Включить звук" : "Выключить звук"} onClick={() => setMutedUI(toggleMuted())}>
+              {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
             <button className="icon-btn" title="Сохранить" onClick={onSave}>
               <Save className="w-4 h-4" />
             </button>

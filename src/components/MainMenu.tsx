@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, FolderOpen, HelpCircle } from "lucide-react";
+import { Play, FolderOpen, HelpCircle, Volume2, VolumeX } from "lucide-react";
+import { initAudioOnGesture, toggleMuted, isMuted } from "../game/sound";
 
 interface Props {
   hasSave: boolean;
@@ -9,7 +10,10 @@ interface Props {
 
 export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
   const [about, setAbout] = useState(false);
+  const [muted, setMuted] = useState(isMuted());
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const startNew = () => { initAudioOnGesture(); onNew(); };
+  const cont = () => { initAudioOnGesture(); onContinue(); };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -177,6 +181,15 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
         </svg>
       </div>
 
+      <button
+        type="button"
+        title={muted ? "Включить звук" : "Выключить звук"}
+        onClick={() => { initAudioOnGesture(); setMuted(toggleMuted()); }}
+        className="absolute top-3 right-3 z-20 w-9 h-9 rounded-xl flex items-center justify-center bg-gray-900/70 border border-white/10 text-indigo-300 hover:text-white transition-colors"
+      >
+        {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+      </button>
+
       <div className="relative z-10 w-full flex flex-col items-center">
         {/* Premium glowing logo header */}
         <div className="mb-4 relative">
@@ -235,7 +248,7 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
           </div>
         ) : (
           <div className="flex flex-col gap-3 w-full mt-4 max-w-[260px]">
-            <button className="group relative w-full px-5 py-3 rounded-xl font-bold text-white shadow-lg overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" onClick={onNew}>
+            <button className="group relative w-full px-5 py-3 rounded-xl font-bold text-white shadow-lg overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" onClick={startNew}>
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-600 transition-all duration-300"></div>
               <div className="absolute -inset-px rounded-xl bg-gradient-to-r from-indigo-400 to-fuchsia-400 opacity-50 blur"></div>
               <span className="relative flex items-center justify-center gap-2 text-xs">
@@ -244,7 +257,7 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
               </span>
             </button>
             
-            <button className="btn secondary py-3 text-xs" onClick={onContinue} disabled={!hasSave}>
+            <button className="btn secondary py-3 text-xs" onClick={cont} disabled={!hasSave}>
               <FolderOpen className="w-4 h-4 shrink-0" />
               Продолжить карьеру
             </button>
