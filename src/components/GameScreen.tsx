@@ -515,22 +515,20 @@ function Frame({
   const wk = weekStream ? engine.getWeek() : null;
   const wp = weekStream ? engine.weekProgress() : null;
 
-  // Live Stock Ticker Calculations (Deterministic seed based jitter)
-  const tickerSeed = p.month * 23 + p.money * 11 + p.reputation * 3;
-  const rubBase = 92.45;
-  const rubChange = Math.sin(tickerSeed) * 4.2;
-  const rubVal = (rubBase + rubChange).toFixed(2);
-  const rubPctVal = (rubChange / rubBase) * 100;
+  // Live market rates — real random-walk state from the engine (small, realistic moves)
+  const rates = p.rates ?? { rub: 92.5, oil: 74.2, it: 4100 };
+  const ratesPrev = p.ratesPrev ?? rates;
+  const rubChange = rates.rub - ratesPrev.rub;
+  const rubVal = rates.rub.toFixed(2);
+  const rubPctVal = ratesPrev.rub ? (rubChange / ratesPrev.rub) * 100 : 0;
 
-  const oilBase = 74.20;
-  const oilChange = Math.cos(tickerSeed + 5) * 6.5;
-  const oilVal = (oilBase + oilChange).toFixed(2);
-  const oilPctVal = (oilChange / oilBase) * 100;
+  const oilChange = rates.oil - ratesPrev.oil;
+  const oilVal = rates.oil.toFixed(2);
+  const oilPctVal = ratesPrev.oil ? (oilChange / ratesPrev.oil) * 100 : 0;
 
-  const itBase = 4120;
-  const itChange = Math.sin(tickerSeed * 2) * 280;
-  const itVal = Math.round(itBase + itChange).toLocaleString();
-  const itPctVal = (itChange / itBase) * 100;
+  const itChange = rates.it - ratesPrev.it;
+  const itVal = Math.round(rates.it).toLocaleString();
+  const itPctVal = ratesPrev.it ? (itChange / ratesPrev.it) * 100 : 0;
 
   // News Gazette Headline choice
   const news = getNewsHeadline(p.month, p.specId);

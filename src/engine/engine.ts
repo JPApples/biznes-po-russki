@@ -86,6 +86,8 @@ export class GameEngine {
     if (p.beatIndex === undefined) p.beatIndex = 0;
     if (!Array.isArray(p.pending)) p.pending = [];
     if (!Array.isArray(p.queue)) p.queue = [];
+    if (!p.rates) p.rates = { rub: 92.5, oil: 74.2, it: 4100 };
+    if (!p.ratesPrev) p.ratesPrev = { ...p.rates };
     if (!p.flags) p.flags = {};
     if (!p.history) p.history = [];
   }
@@ -178,6 +180,30 @@ export class GameEngine {
     if (RANDOM_POOL.length && Math.random() < 0.6) {
       p.queue.push(pick(RANDOM_POOL));
     }
+  }
+
+  /** Macro market random-walk — small realistic moves (±~1.3%/step), not casino swings. */
+  private driftRates(): void {
+    const p = this.player;
+    if (!p.rates) p.rates = { rub: 92.5, oil: 74.2, it: 4100 };
+    p.ratesPrev = { ...p.rates };
+    const walk = (v: number) => v * (1 + (Math.random() - 0.5) * 0.026);
+    p.rates = {
+      rub: Math.round(walk(p.rates.rub) * 100) / 100,
+      oil: Math.round(walk(p.rates.oil) * 100) / 100,
+      it: Math.round(walk(p.rates.it)),
+    };
+  }
+
+  /** Light macro effect on monthly income (capped ±10%). */
+  rateIncomeFactor(): number {
+    const p = this.player;
+    if (!p.rates) return 1;
+    const oilDev = (p.rates.oil - 74.2) / 74.2;                              // нефть ↑ → спрос ↑
+    const itDev = p.specId === "it" ? (p.rates.it - 4100) / 4100 : 0;        // IT-индекс ↑ → бонус IT
+    const rubDev = (p.rates.rub - 92.5) / 92.5;                              // слабый рубль → дороже импорт
+    const f = 1 + oilDev * 0.15 + itDev * 0.2 - rubDev * 0.1;
+    return Math.max(0.9, Math.min(1.1, f));
   }
 
   /** Returns true (and ends the game) if any lose condition is met. */
@@ -304,6 +330,7 @@ export class GameEngine {
     }
     this.player.week += 1;
     this.player.beatIndex = 0;
+    this.driftRates();
     this.consumePending();
     this.maybeInject();
     this.phase = "beat";
@@ -434,9 +461,10 @@ export class GameEngine {
   }
 
   nextMonth(): void {
+    this.driftRates();
     const rev = this.estimateRevenue();
     const salary = this.getTotalSalary();
-    const netIncome = rev - salary;
+    const netIncome = Math.round((rev - salary) * this.rateIncomeFactor()); // курсы слабо влияют на доход
     this.player.money += netIncome;
     this.recordStats(netIncome);
 

@@ -29,6 +29,8 @@ export function createPlayer(origin: Origin, spec: Specialization, trait: Trait)
     beatIndex: 0,
     pending: [],
     queue: [],
+    rates: { rub: 92.5, oil: 74.2, it: 4100 },
+    ratesPrev: { rub: 92.5, oil: 74.2, it: 4100 },
     annaLoyalty: 50,
     maxLoyalty: 50,
     flags: { ...origin.flags },

@@ -207,6 +207,8 @@ export interface PlayerState {
   beatIndex: number;       // index within the current week's events
   pending: PendingConsequence[]; // deferred next-day consequences
   queue: Beat[];           // injected random events / inspections shown before the regular beat
+  rates?: { rub: number; oil: number; it: number };      // macro market rates (light mechanic)
+  ratesPrev?: { rub: number; oil: number; it: number };  // previous tick for delta display
   annaLoyalty: number;
   maxLoyalty: number;
   flags: Record<string, unknown>;
