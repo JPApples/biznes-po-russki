@@ -1649,3 +1649,27 @@ html, body { overflow-x: hidden; }
 }
 .res-bar > i { display: block; height: 100%; border-radius: 2px; transition: width .5s ease; }
 @media (min-width: 1024px) { .res.has-bar { padding-bottom: 12px !important; } }
+
+/* #3 dashboard command bar — turn the bare header row into a framed bar */
+.phase-head {
+  background: rgba(17, 24, 39, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 8px 10px 8px 13px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.toolbar {
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+.icon-btn {
+  width: 30px; height: 30px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+}
+.icon-btn:hover { background: rgba(255, 255, 255, 0.07); transform: none; }
