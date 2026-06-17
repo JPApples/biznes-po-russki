@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import type { GameEngine } from "../engine/engine";
+import { levelInfo } from "../engine/player";
 import type { AdvisorLine, Effects, PlayerState } from "../engine/types";
 import ResourcePanel from "./ResourcePanel";
 import Advisors from "./Advisors";
@@ -17,7 +18,7 @@ import {
 import employeesData from "../data/employees.json";
 import { AdvisorAvatar } from "./Advisors";
 import { sfx, toggleMuted, isMuted } from "../game/sound";
-import { confettiBurst } from "../game/confetti";
+import { confettiBurst, flashToast } from "../game/confetti";
 
 const PHASE_NAME: Record<string, string> = {
   event: "Входящее событие",
@@ -65,6 +66,14 @@ export default function GameScreen({
   const [candidates, setCandidates] = useState<any[]>([]);
   const flash = useRef(0);
   const p = engine.player;
+
+  // level-up celebration
+  const lvl = levelInfo(p.xp).level;
+  const lvlRef = useRef(lvl);
+  useEffect(() => {
+    if (lvl > lvlRef.current) { confettiBurst(); flashToast(`🎉 Уровень ${lvl}: ${levelInfo(p.xp).title}`); }
+    lvlRef.current = lvl;
+  }, [lvl, p.xp]);
 
   const showDelta = (e: Effects) => {
     flash.current += 1;
@@ -480,6 +489,24 @@ export default function GameScreen({
   return null;
 }
 
+function LevelPanel({ p }: { p: PlayerState }) {
+  const li = levelInfo(p.xp);
+  return (
+    <div className="glass-panel rounded-2xl border border-white/5 p-3 flex items-center gap-3">
+      <div className="lvl-empire" title={li.title}>{li.emoji}</div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[11px] font-black uppercase tracking-wider text-indigo-300 truncate">Ур. {li.level} · {li.title}</span>
+          <span className="text-[10px] text-gray-400 font-mono shrink-0">{li.nextAt ? `${li.xp}/${li.nextAt}` : `${li.xp}`} XP</span>
+        </div>
+        <div className="w-full bg-gray-950/80 rounded-full h-2 border border-white/5 overflow-hidden mt-1.5">
+          <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-700" style={{ width: `${li.pct}%` }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConsequenceBanner({ cons }: { cons: { text: string }[] }) {
   return (
     <div className="conseq-banner fade-in">
@@ -549,6 +576,7 @@ function Frame({
     <div className="game-layout">
       {/* LEFT COLUMN: Stat panel + Advisors dialogue */}
       <div className="layout-left">
+        <LevelPanel p={p} />
         <ResourcePanel p={p} delta={delta} flashKey={flashKey} />
         
         {/* Employees Panel (Desktop only) */}

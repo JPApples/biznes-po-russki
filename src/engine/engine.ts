@@ -43,6 +43,10 @@ const LOSE_RULES: { test: (p: PlayerState) => boolean; title: string; desc: stri
   { test: (p) => p.karma <= -70, title: "Проклятие репутации", desc: "Слишком много нечестных ходов. Партнёры и город отвернулись от тебя." },
 ];
 
+const XP_BY_TYPE: Record<ChoiceType, number> = {
+  reliable: 12, secret: 14, situational: 6, harmful: 1,
+};
+
 const loyaltyDelta: Record<ChoiceType, { anna: number; max: number }> = {
   reliable: { anna: 5, max: -3 },
   situational: { anna: -1, max: 3 },
@@ -82,6 +86,7 @@ export class GameEngine {
     const p = this.player as Partial<PlayerState> & PlayerState;
     if (p.health === undefined) p.health = 80;
     if (p.energy === undefined) p.energy = 70;
+    if (p.xp === undefined) p.xp = 0;
     if (p.week === undefined) p.week = 1;
     if (p.beatIndex === undefined) p.beatIndex = 0;
     if (!Array.isArray(p.pending)) p.pending = [];
@@ -271,6 +276,7 @@ export class GameEngine {
     if (!choice) return null;
 
     this.player = applyEffects(this.player, choice.effects);
+    this.player.xp += XP_BY_TYPE[choice.type] ?? 0;
     if (choice.next) {
       this.player.pending.push({
         effects: choice.next,
@@ -288,6 +294,7 @@ export class GameEngine {
     if (!mg) return { effectsText: "" };
     const eff = win ? mg.win : mg.lose;
     if (eff) this.player = applyEffects(this.player, eff);
+    if (win) this.player.xp += 20;
     return { effectsText: (win ? mg.winText : mg.loseText) ?? "" };
   }
 
@@ -321,6 +328,7 @@ export class GameEngine {
 
   /** From the week-summary screen: go to next week, or wrap up Month 1. */
   advanceWeek(): void {
+    this.player.xp += 15; // прошёл неделю
     if (this.player.week >= MONTH1.weeks.length) {
       // Month 1 finished → enter the monthly business-plan flow (shared with later months)
       this.player.pending = [];
@@ -461,6 +469,7 @@ export class GameEngine {
   }
 
   nextMonth(): void {
+    this.player.xp += 50; // закрыл месяц
     this.driftRates();
     const rev = this.estimateRevenue();
     const salary = this.getTotalSalary();

@@ -30,3 +30,26 @@ export function confettiBurst(
   document.body.appendChild(layer);
   setTimeout(() => layer.remove(), 1900);
 }
+
+/** Brief centered toast banner (level-ups, milestones). */
+export function flashToast(text: string): void {
+  if (typeof document === "undefined") return;
+  const el = document.createElement("div");
+  el.textContent = text;
+  el.style.cssText =
+    "position:fixed;left:50%;top:17%;transform:translateX(-50%);z-index:10000;" +
+    "background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:800;" +
+    "padding:12px 22px;border-radius:14px;box-shadow:0 12px 34px -8px rgba(99,102,241,.7);" +
+    "font-size:15px;letter-spacing:.3px;pointer-events:none;white-space:nowrap";
+  el.animate(
+    [
+      { opacity: 0, transform: "translateX(-50%) translateY(-14px) scale(.9)" },
+      { opacity: 1, transform: "translateX(-50%) translateY(0) scale(1)", offset: 0.15 },
+      { opacity: 1, offset: 0.8 },
+      { opacity: 0, transform: "translateX(-50%) translateY(-10px)" },
+    ],
+    { duration: 2600, easing: "ease" },
+  );
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2700);
+}

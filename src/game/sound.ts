@@ -90,25 +90,41 @@ function startSynthPad(): void {
   ambientNodes = { stop: () => { oscs.forEach((o) => o.stop()); lfo.stop(); } };
 }
 
+function stopSynthPad(): void {
+  if (ambientNodes) { ambientNodes.stop(); ambientNodes = null; }
+}
+
 export function startAmbient(): void {
-  if (muted || ambientOn) return;
+  if (muted) return;
   ambientOn = true;
   if (!bgEl) {
     bgEl = new Audio("/sounds/lofi.mp3");
     bgEl.loop = true;
     bgEl.volume = 0.28;
-    bgEl.onerror = () => { bgEl = null; startSynthPad(); }; // no file → synth pad
+    bgEl.preload = "auto";
+    // Only fall back to the synth pad on a *genuine* load failure (missing/corrupt file).
+    bgEl.onerror = () => { if (ambientOn && bgEl?.error) startSynthPad(); };
   }
-  if (bgEl) {
-    bgEl.muted = muted;
-    bgEl.play().catch(() => startSynthPad());
+  bgEl.muted = muted;
+  // The real track is the music; the synth pad is only an emergency stand-in.
+  // Re-attempt play() on every gesture so a once-blocked track recovers instead of
+  // leaving the player stuck on the synth "hum".
+  if (bgEl.paused) {
+    const pr = bgEl.play();
+    if (pr && typeof pr.then === "function") {
+      pr.then(() => stopSynthPad()) // track is playing → silence any stand-in pad
+        .catch((err: DOMException) => {
+          // A quick pause()/navigation aborts play() harmlessly — don't start the hum for that.
+          if (ambientOn && err && err.name !== "AbortError") startSynthPad();
+        });
+    }
   }
 }
 
 export function stopAmbient(): void {
   ambientOn = false;
   if (bgEl) { bgEl.pause(); }
-  if (ambientNodes) { ambientNodes.stop(); ambientNodes = null; }
+  stopSynthPad();
 }
 
 /* ── looping event ambience: cafe murmur / bar buzz (filtered noise) ── */

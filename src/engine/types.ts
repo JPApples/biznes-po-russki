@@ -201,6 +201,7 @@ export interface PlayerState {
   karma: number;
   health: number;
   energy: number;
+  xp: number;
   month: number;
   /* week-stream cursor (Month 1) */
   week: number;            // 1..4

@@ -24,6 +24,7 @@ export function createPlayer(origin: Origin, spec: Specialization, trait: Trait)
     karma: 0,
     health: 80,
     energy: 70,
+    xp: 0,
     month: 1,
     week: 1,
     beatIndex: 0,
@@ -64,4 +65,25 @@ export function applyEffects(p: PlayerState, e0: Effects): PlayerState {
 
 export function estimateRevenue(p: PlayerState): number {
   return Math.round(p.baseRevenue * p.multiplier * (1 + p.reputation / 100));
+}
+
+/** Entrepreneur progression: XP → level, title and a growing "empire" emoji. */
+const LEVELS = [
+  { min: 0, title: "Новичок", emoji: "🛖" },
+  { min: 100, title: "Лавочник", emoji: "🏪" },
+  { min: 280, title: "Предприниматель", emoji: "🏢" },
+  { min: 560, title: "Делец", emoji: "🏙️" },
+  { min: 1000, title: "Магнат", emoji: "🏛️" },
+  { min: 1700, title: "Империя", emoji: "👑" },
+];
+
+export function levelInfo(xp: number): { level: number; title: string; emoji: string; pct: number; xp: number; nextAt: number | null } {
+  const x = xp || 0;
+  let i = 0;
+  for (let k = 0; k < LEVELS.length; k++) if (x >= LEVELS[k].min) i = k;
+  const cur = LEVELS[i];
+  const next = LEVELS[i + 1];
+  const span = next ? next.min - cur.min : 1;
+  const pct = next ? Math.min(100, Math.round(((x - cur.min) / span) * 100)) : 100;
+  return { level: i + 1, title: cur.title, emoji: cur.emoji, pct, xp: x, nextAt: next ? next.min : null };
 }

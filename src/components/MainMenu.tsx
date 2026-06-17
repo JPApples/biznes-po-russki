@@ -2,12 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { Play, FolderOpen, HelpCircle, Volume2, VolumeX } from "lucide-react";
 import { initAudioOnGesture, toggleMuted, isMuted } from "../game/sound";
 
-// Custom banknote palettes for the floating-cash background (replaces emoji glyphs).
-const BILL_PALETTES = [
-  { fill: "#1f7a4d", edge: "#5eead4", frame: "rgba(220,255,235,0.55)", coin: "#0d3a24", sign: "#d1fae5" }, // money green
-  { fill: "#4338ca", edge: "#a5b4fc", frame: "rgba(225,225,255,0.55)", coin: "#1e1b4b", sign: "#e0e7ff" }, // brand indigo
-  { fill: "#a16207", edge: "#fde68a", frame: "rgba(255,248,220,0.6)", coin: "#451a03", sign: "#fff7ed" }, // gold
-];
+// One consistent green for every floating banknote.
+const BILL_GREEN = "#34d399";
+const BILL_FILL = "rgba(16,185,129,0.16)";
 
 function billPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
   if (typeof ctx.roundRect === "function") { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return; }
@@ -20,28 +17,25 @@ function billPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number
   ctx.closePath();
 }
 
-// Draw a small stylised banknote centred at the current origin.
-function drawBill(ctx: CanvasRenderingContext2D, w: number, pal: typeof BILL_PALETTES[number]): void {
-  const h = w * 0.54;
-  billPath(ctx, -w / 2, -h / 2, w, h, h * 0.16);
-  ctx.fillStyle = pal.fill;
+// Draw Lucide's "Banknote" icon, centred at the current origin (24x24 design grid).
+function drawBanknote(ctx: CanvasRenderingContext2D, w: number): void {
+  const s = w / 24;
+  ctx.lineWidth = Math.max(1, 1.9 * s);
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = BILL_GREEN;
+  // bill body (rect 20x12, rx 2)
+  billPath(ctx, -10 * s, -6 * s, 20 * s, 12 * s, 2.2 * s);
+  ctx.fillStyle = BILL_FILL;
   ctx.fill();
-  ctx.lineWidth = Math.max(1, w * 0.04);
-  ctx.strokeStyle = pal.edge;
   ctx.stroke();
-  billPath(ctx, -w / 2 + w * 0.07, -h / 2 + h * 0.13, w * 0.86, h * 0.74, h * 0.12);
-  ctx.lineWidth = Math.max(0.6, w * 0.022);
-  ctx.strokeStyle = pal.frame;
-  ctx.stroke();
+  // central circle (r 2)
   ctx.beginPath();
-  ctx.arc(0, 0, h * 0.27, 0, Math.PI * 2);
-  ctx.fillStyle = pal.coin;
-  ctx.fill();
-  ctx.fillStyle = pal.sign;
-  ctx.font = `700 ${Math.round(h * 0.42)}px ui-sans-serif, system-ui, sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("$", 0, h * 0.04);
+  ctx.arc(0, 0, 2.1 * s, 0, Math.PI * 2);
+  ctx.stroke();
+  // the two side dots
+  ctx.fillStyle = BILL_GREEN;
+  ctx.beginPath(); ctx.arc(-6.2 * s, 0, 0.75 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(6.2 * s, 0, 0.75 * s, 0, Math.PI * 2); ctx.fill();
 }
 
 interface Props {
@@ -114,7 +108,6 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
       size: number;
       rot: number;
       vrot: number;
-      pal: typeof BILL_PALETTES[number];
 
       constructor() {
         this.x = Math.random() * width;
@@ -124,7 +117,6 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
         this.size = Math.random() * 1.4 + 1.1; // a touch smaller than the old emoji glyphs
         this.rot = (Math.random() - 0.5) * 0.5; // banknotes stay mostly upright, slight tilt
         this.vrot = (Math.random() - 0.5) * 0.01;
-        this.pal = BILL_PALETTES[Math.floor(Math.random() * BILL_PALETTES.length)];
       }
 
       update() {
@@ -153,7 +145,7 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rot);
         ctx.globalAlpha = 0.8;
-        drawBill(ctx, this.size * 13, this.pal); // custom vector banknote
+        drawBanknote(ctx, this.size * 13); // identical green Lucide-style banknote
         ctx.restore();
       }
     }
