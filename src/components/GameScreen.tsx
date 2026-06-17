@@ -19,6 +19,7 @@ import employeesData from "../data/employees.json";
 import { AdvisorAvatar } from "./Advisors";
 import { sfx, toggleMuted, isMuted } from "../game/sound";
 import { confettiBurst, flashToast } from "../game/confetti";
+import { newlyUnlocked, unlockedCount, ACHIEVEMENTS } from "../game/achievements";
 
 const PHASE_NAME: Record<string, string> = {
   event: "Входящее событие",
@@ -74,6 +75,17 @@ export default function GameScreen({
     if (lvl > lvlRef.current) { confettiBurst(); flashToast(`🎉 Уровень ${lvl}: ${levelInfo(p.xp).title}`); }
     lvlRef.current = lvl;
   }, [lvl, p.xp]);
+
+  // achievement unlocks
+  useEffect(() => {
+    const fresh = newlyUnlocked(p);
+    if (fresh.length) {
+      p.flags.ach = ((p.flags.ach as string[]) || []).concat(fresh.map((a) => a.id));
+      confettiBurst();
+      fresh.forEach((a, i) => setTimeout(() => flashToast(`🏆 ${a.emoji} ${a.title}`), 300 + i * 1100));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.money, p.reputation, p.shadow, p.karma, p.health, p.energy, p.nerves, p.workLife, p.xp, p.week, p.month]);
 
   const showDelta = (e: Effects) => {
     flash.current += 1;
@@ -497,11 +509,45 @@ function LevelPanel({ p }: { p: PlayerState }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="text-[11px] font-black uppercase tracking-wider text-indigo-300 truncate">Ур. {li.level} · {li.title}</span>
-          <span className="text-[10px] text-gray-400 font-mono shrink-0">{li.nextAt ? `${li.xp}/${li.nextAt}` : `${li.xp}`} XP</span>
+          <span className="text-[10px] text-gray-400 font-mono shrink-0 flex items-center gap-2">
+            <span>{li.nextAt ? `${li.xp}/${li.nextAt}` : `${li.xp}`} XP</span>
+            <span className="text-amber-300" title="Достижения">🏆 {unlockedCount(p)}/{ACHIEVEMENTS.length}</span>
+          </span>
         </div>
         <div className="w-full bg-gray-950/80 rounded-full h-2 border border-white/5 overflow-hidden mt-1.5">
           <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-700" style={{ width: `${li.pct}%` }} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function GoalPanel({ p }: { p: PlayerState }) {
+  const health = p.health ?? 80;
+  const conds = [
+    { label: "Тень закона < 40%", ok: p.shadow < 40 },
+    { label: "Деньги в плюсе", ok: p.money >= 0 },
+    { label: "Карма не в минусе", ok: p.karma >= 0 },
+    { label: "Здоровье > 30%", ok: health > 30 },
+  ];
+  const done = conds.filter((c) => c.ok).length;
+  const pct = Math.round((done / conds.length) * 100);
+  return (
+    <div className="glass-panel rounded-2xl border border-white/5 p-4 relative overflow-hidden">
+      <div className="absolute -top-6 -right-6 w-20 h-20 bg-emerald-400/10 blur-2xl rounded-full pointer-events-none" />
+      <h5 className="font-bold text-[11px] uppercase tracking-wider text-gray-300 mb-2 flex items-center justify-between select-none">
+        <span className="flex items-center gap-1.5">🎯 Цель месяца {p.month}</span>
+        <span className="text-emerald-400 font-mono">{done}/{conds.length}</span>
+      </h5>
+      <div className="w-full bg-gray-950/80 rounded-full h-1.5 border border-white/5 overflow-hidden mb-2.5">
+        <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-700" style={{ width: `${pct}%` }} />
+      </div>
+      <div className="flex flex-col gap-1">
+        {conds.map((c) => (
+          <div key={c.label} className={"text-[11px] font-semibold flex items-center gap-1.5 " + (c.ok ? "text-emerald-300" : "text-gray-500")}>
+            <span>{c.ok ? "✓" : "○"}</span> {c.label}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -664,6 +710,9 @@ function Frame({
 
       {/* RIGHT COLUMN (PC Only): Gazette news, dynamic stock tickers, awards, and indicators analytics chart */}
       <div className="layout-right">
+        {/* Monthly goal */}
+        <GoalPanel p={p} />
+
         {/* News Gazette */}
         <div className="glass-panel rounded-2xl border border-white/5 p-4 relative overflow-hidden flex flex-col justify-between min-h-[120px]">
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-purple-500/10 to-transparent blur-xl pointer-events-none"></div>
