@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import type { MiniGame as MG } from "../engine/types";
 import { sfx, startEventAmbience } from "../game/sound";
+import { AdvisorAvatar } from "./Advisors";
 import {
   Laptop, GraduationCap, Factory, Utensils,
   ShoppingCart, Scissors, Sprout, CheckCircle2,
@@ -66,33 +67,50 @@ function DragGame({ mg, onDone }: { mg: MG; onDone: (c: boolean) => void }) {
     if (np.length >= mg.items.length) setTimeout(() => onDone(true), 700);
   };
 
+  const who: "anna" | "max" = isBar ? "max" : "anna";
+
   return (
-    <div className="card fade-in mg glow-indigo">
-      <div className="card-title text-sm md:text-base mb-1">{mg.name}</div>
-      <p className="card-text text-gray-300 font-medium mb-3">{mg.prompt}</p>
-      <div className="dnd-scene">
-        <div className="dnd-items">
+    <div className={"dnd-card fade-in " + (isBar ? "bar" : "cafe")}>
+      <div className="dnd-top">
+        <AdvisorAvatar who={who} size={54} />
+        <div className="min-w-0">
+          <div className="dnd-name">{mg.name}</div>
+          <p className="dnd-prompt">{mg.prompt}</p>
+        </div>
+      </div>
+
+      <div className="dnd-stage">
+        <div className="dnd-shelf">
           {mg.items.map((it, i) => (
             placed.includes(i) ? null : (
-              <div key={i} className="dnd-item" draggable
+              <button key={i} type="button" className="dnd-obj" draggable
                 onDragStart={(e) => e.dataTransfer.setData("text", String(i))}
                 onClick={() => place(i)}
-                title="Перетащи или тапни">
+                aria-label="Перетащи или тапни">
                 {it}
-              </div>
+              </button>
             )
           ))}
-          {allDone && <span className="text-xs text-emerald-400 font-bold">Готово!</span>}
+          {allDone && <div className="dnd-clear">готово ✓</div>}
         </div>
-        <div className={"dnd-target" + (over ? " over" : "") + (allDone ? " full" : "")}
+
+        <div className={"dnd-counter" + (over ? " over" : "") + (allDone ? " done" : "")}
           onDragOver={(e) => { e.preventDefault(); setOver(true); }}
           onDragLeave={() => setOver(false)}
           onDrop={(e) => { e.preventDefault(); setOver(false); const i = Number(e.dataTransfer.getData("text")); if (!Number.isNaN(i)) place(i); }}>
-          <span className="dnd-target-glyph">{targetGlyph}</span>
-          <span className="dnd-count">{placed.length}/{mg.items.length}</span>
+          <div className="dnd-tray">
+            {placed.length === 0 && <span className="dnd-ghost">{targetGlyph}</span>}
+            {placed.map((pi, k) => <span key={k} className="dnd-tray-item">{mg.items[pi]}</span>)}
+          </div>
+          <div className="dnd-dots">
+            {Array.from({ length: mg.items.length }).map((_, k) => (
+              <span key={k} className={"dnd-dot" + (k < placed.length ? " on" : "")} />
+            ))}
+          </div>
         </div>
       </div>
-      <p className="muted text-[11px] mt-2">Перетащи элементы на цель (или просто тапни).</p>
+
+      <p className="dnd-hint">Перетащи предметы на стойку — или просто тапни</p>
     </div>
   );
 }
