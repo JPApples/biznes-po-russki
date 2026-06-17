@@ -111,8 +111,60 @@ export function stopAmbient(): void {
   if (ambientNodes) { ambientNodes.stop(); ambientNodes = null; }
 }
 
+/* ── looping event ambience: cafe murmur / bar buzz (filtered noise) ── */
+let eventAmb: { stop: () => void } | null = null;
+function noiseBuffer(c: AudioContext): AudioBuffer {
+  const len = Math.floor(c.sampleRate * 2);
+  const b = c.createBuffer(1, len, c.sampleRate);
+  const d = b.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  return b;
+}
+export function startEventAmbience(kind: "cafe" | "bar"): () => void {
+  stopEventAmbience();
+  if (muted) return () => {};
+  const c = ac();
+  const src = c.createBufferSource();
+  src.buffer = noiseBuffer(c);
+  src.loop = true;
+  const filt = c.createBiquadFilter();
+  filt.type = "lowpass";
+  filt.frequency.value = kind === "bar" ? 1500 : 820; // bar brighter, cafe softer
+  const g = c.createGain();
+  g.gain.value = 0;
+  src.connect(filt).connect(g).connect(master!);
+  src.start();
+  g.gain.linearRampToValueAtTime(kind === "bar" ? 0.06 : 0.045, c.currentTime + 0.6); // fade in
+  // gentle wobble so it feels alive (crowd swell)
+  const lfo = c.createOscillator();
+  const lfoG = c.createGain();
+  lfo.frequency.value = 0.15;
+  lfoG.gain.value = 0.015;
+  lfo.connect(lfoG).connect(g.gain);
+  lfo.start();
+  eventAmb = { stop: () => { try { src.stop(); lfo.stop(); } catch { /* ignore */ } } };
+  return stopEventAmbience;
+}
+export function stopEventAmbience(): void {
+  if (eventAmb) { eventAmb.stop(); eventAmb = null; }
+}
+
 /** Call once on the first user gesture (browser autoplay policy). */
 export function initAudioOnGesture(): void {
   ac();
   if (!muted) startAmbient();
+}
+
+/** Guarantee audio starts on the first interaction anywhere (e.g. loading straight into a saved game). */
+let gestureHooked = false;
+export function hookFirstGesture(): void {
+  if (gestureHooked) return;
+  gestureHooked = true;
+  const h = () => {
+    initAudioOnGesture();
+    window.removeEventListener("pointerdown", h);
+    window.removeEventListener("keydown", h);
+  };
+  window.addEventListener("pointerdown", h);
+  window.addEventListener("keydown", h);
 }

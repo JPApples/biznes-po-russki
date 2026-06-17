@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import type { MiniGame as MG } from "../engine/types";
-import { sfx } from "../game/sound";
+import { sfx, startEventAmbience } from "../game/sound";
 import {
   Laptop, GraduationCap, Factory, Utensils,
   ShoppingCart, Scissors, Sprout, CheckCircle2,
@@ -51,6 +51,12 @@ function DragGame({ mg, onDone }: { mg: MG; onDone: (c: boolean) => void }) {
   const targetGlyph = mg.correct[0] || "🎯";
   const isBar = /бар|чока|🍺|🥂/i.test(mg.name + mg.prompt);
   const allDone = placed.length >= mg.items.length;
+
+  // ambient cafe / bar noise while the scene is open
+  useEffect(() => {
+    const stop = startEventAmbience(isBar ? "bar" : "cafe");
+    return stop;
+  }, [isBar]);
 
   const place = (i: number) => {
     if (placed.includes(i) || allDone) return;

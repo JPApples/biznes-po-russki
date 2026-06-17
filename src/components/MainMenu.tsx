@@ -72,15 +72,17 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
       size: number;
       rot: number;
       vrot: number;
+      glyph: string;
 
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
         this.vx = (Math.random() - 0.5) * 0.5;
         this.vy = (Math.random() - 0.5) * 0.5 - 0.1; // slight upward drift, like floating cash
-        this.size = Math.random() * 1.6 + 1.1;
-        this.rot = Math.random() * Math.PI * 2;
-        this.vrot = (Math.random() - 0.5) * 0.02;
+        this.size = Math.random() * 1.8 + 1.3;
+        this.rot = (Math.random() - 0.5) * 0.5; // banknotes stay mostly upright, slight tilt
+        this.vrot = (Math.random() - 0.5) * 0.01;
+        this.glyph = ["💵", "💶", "💷", "💸"][Math.floor(Math.random() * 4)];
       }
 
       update() {
@@ -105,23 +107,14 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
 
       draw() {
         if (!ctx) return;
-        const w = this.size * 7;
-        const h = this.size * 3.2;
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rot);
-        ctx.beginPath();
-        ctx.roundRect(-w / 2, -h / 2, w, h, 1.6);
-        ctx.fillStyle = "rgba(52, 211, 153, 0.45)";
-        ctx.fill();
-        ctx.lineWidth = 0.6;
-        ctx.strokeStyle = "rgba(16, 185, 129, 0.65)";
-        ctx.stroke();
-        ctx.fillStyle = "rgba(4, 30, 22, 0.85)";
-        ctx.font = `${Math.round(h * 0.78)}px sans-serif`;
+        ctx.globalAlpha = 0.85;
+        ctx.font = `${Math.round(this.size * 13)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("₽", 0, 0.5);
+        ctx.fillText(this.glyph, 0, 0);
         ctx.restore();
       }
     }
