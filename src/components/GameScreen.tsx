@@ -17,6 +17,7 @@ import {
 import employeesData from "../data/employees.json";
 import { AdvisorAvatar } from "./Advisors";
 import { sfx, toggleMuted, isMuted } from "../game/sound";
+import { confettiBurst } from "../game/confetti";
 
 const PHASE_NAME: Record<string, string> = {
   event: "Входящее событие",
@@ -121,7 +122,7 @@ export default function GameScreen({
         <div className="phase-anim" key={"beat-mg" + beat.id}>
           {cons.length > 0 && <ConsequenceBanner cons={cons} />}
           <MiniGame mg={mg} specId={p.specId} traitId={p.traitId} onDone={(correct) => {
-            if (correct) sfx.win(); else sfx.fail();
+            if (correct) { sfx.win(); confettiBurst(); } else sfx.fail();
             const r = engine.resolveBeatMiniGame(correct);
             const eff = correct ? mg.win : mg.lose;
             if (eff) showDelta(eff);
@@ -158,12 +159,9 @@ export default function GameScreen({
         </div>
         <div className="stack">
           {choices.map((c) => (
-            <button key={c.id} className={"choice " + c.type} onClick={() => {
+            <button key={c.id} data-sfx={beat.kind === "lunch" ? "sip" : beat.kind === "leisure" ? "clink" : "click"} className={"choice " + c.type} onClick={() => {
               const r = engine.chooseBeat(c.id);
               if (!r) return;
-              if (beat.kind === "lunch") sfx.sip();
-              else if (beat.kind === "leisure") sfx.clink();
-              else sfx.click();
               if ((r.choice.effects.money ?? 0) > 0) sfx.cash();
               showDelta(r.choice.effects);
               const note = [
@@ -202,7 +200,7 @@ export default function GameScreen({
             <MiniStat label="Энергия" val={`${p.energy}%`} cls="text-cyan-400" />
             <MiniStat label="Репутация" val={`${p.reputation}%`} cls="text-amber-400" />
           </div>
-          <button className="btn font-extrabold mt-5" onClick={() => { engine.advanceWeek(); onChange(); }}>
+          <button className="btn font-extrabold mt-5" onClick={() => { if (good) confettiBurst(); engine.advanceWeek(); onChange(); }}>
             {lastWeek ? "Свести итоги месяца →" : `Перейти к неделе ${p.week + 1} →`}
           </button>
         </div>
@@ -369,7 +367,7 @@ export default function GameScreen({
     return wrap(
       <div className="phase-anim" key="mg">
         <MiniGame mg={mg} specId={p.specId} traitId={p.traitId} onDone={(correct) => {
-          if (correct) sfx.win(); else sfx.fail();
+          if (correct) { sfx.win(); confettiBurst(); } else sfx.fail();
           engine.processMiniGame(correct);
           if (correct) showDelta({ reputation: 3, karma: 1 });
           onChange();
@@ -471,7 +469,7 @@ export default function GameScreen({
             </div>
           )}
           
-          <button className="btn font-extrabold" style={{ marginTop: 20 }} onClick={() => { engine.nextMonth(); onChange(); }}>
+          <button className="btn font-extrabold" style={{ marginTop: 20 }} onClick={() => { confettiBurst(); engine.nextMonth(); onChange(); }}>
             {p.month >= 3 ? "Подвести итоги этапа →" : "Перейти к следующему месяцу →"}
           </button>
         </div>

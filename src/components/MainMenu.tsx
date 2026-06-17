@@ -2,6 +2,48 @@ import { useState, useEffect, useRef } from "react";
 import { Play, FolderOpen, HelpCircle, Volume2, VolumeX } from "lucide-react";
 import { initAudioOnGesture, toggleMuted, isMuted } from "../game/sound";
 
+// Custom banknote palettes for the floating-cash background (replaces emoji glyphs).
+const BILL_PALETTES = [
+  { fill: "#1f7a4d", edge: "#5eead4", frame: "rgba(220,255,235,0.55)", coin: "#0d3a24", sign: "#d1fae5" }, // money green
+  { fill: "#4338ca", edge: "#a5b4fc", frame: "rgba(225,225,255,0.55)", coin: "#1e1b4b", sign: "#e0e7ff" }, // brand indigo
+  { fill: "#a16207", edge: "#fde68a", frame: "rgba(255,248,220,0.6)", coin: "#451a03", sign: "#fff7ed" }, // gold
+];
+
+function billPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
+  if (typeof ctx.roundRect === "function") { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); return; }
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// Draw a small stylised banknote centred at the current origin.
+function drawBill(ctx: CanvasRenderingContext2D, w: number, pal: typeof BILL_PALETTES[number]): void {
+  const h = w * 0.54;
+  billPath(ctx, -w / 2, -h / 2, w, h, h * 0.16);
+  ctx.fillStyle = pal.fill;
+  ctx.fill();
+  ctx.lineWidth = Math.max(1, w * 0.04);
+  ctx.strokeStyle = pal.edge;
+  ctx.stroke();
+  billPath(ctx, -w / 2 + w * 0.07, -h / 2 + h * 0.13, w * 0.86, h * 0.74, h * 0.12);
+  ctx.lineWidth = Math.max(0.6, w * 0.022);
+  ctx.strokeStyle = pal.frame;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(0, 0, h * 0.27, 0, Math.PI * 2);
+  ctx.fillStyle = pal.coin;
+  ctx.fill();
+  ctx.fillStyle = pal.sign;
+  ctx.font = `700 ${Math.round(h * 0.42)}px ui-sans-serif, system-ui, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("$", 0, h * 0.04);
+}
+
 interface Props {
   hasSave: boolean;
   onNew: () => void;
@@ -72,17 +114,17 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
       size: number;
       rot: number;
       vrot: number;
-      glyph: string;
+      pal: typeof BILL_PALETTES[number];
 
       constructor() {
         this.x = Math.random() * width;
         this.y = Math.random() * height;
         this.vx = (Math.random() - 0.5) * 0.5;
         this.vy = (Math.random() - 0.5) * 0.5 - 0.1; // slight upward drift, like floating cash
-        this.size = Math.random() * 1.8 + 1.3;
+        this.size = Math.random() * 1.4 + 1.1; // a touch smaller than the old emoji glyphs
         this.rot = (Math.random() - 0.5) * 0.5; // banknotes stay mostly upright, slight tilt
         this.vrot = (Math.random() - 0.5) * 0.01;
-        this.glyph = ["💵", "💶", "💷", "💸"][Math.floor(Math.random() * 4)];
+        this.pal = BILL_PALETTES[Math.floor(Math.random() * BILL_PALETTES.length)];
       }
 
       update() {
@@ -110,11 +152,8 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rot);
-        ctx.globalAlpha = 0.85;
-        ctx.font = `${Math.round(this.size * 13)}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(this.glyph, 0, 0);
+        ctx.globalAlpha = 0.8;
+        drawBill(ctx, this.size * 13, this.pal); // custom vector banknote
         ctx.restore();
       }
     }
@@ -144,7 +183,7 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
   }, []);
 
   return (
-    <div className="screen center fade-in relative overflow-hidden select-none" style={{ gap: 20 }}>
+    <div className="screen center menu-screen fade-in relative select-none" style={{ gap: 20 }}>
       {/* Fullscreen interactive particle canvas background spanning the entire viewport */}
       <canvas
         ref={canvasRef}
@@ -216,9 +255,11 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
         <h1 className="text-2xl md:text-4xl font-black tracking-tight mb-2 text-white leading-tight">
           БИЗНЕС <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-500">ПО-РУССКИ</span>
         </h1>
-        <p className="text-gray-300 text-xs md:text-sm max-w-sm mx-auto mb-6 leading-relaxed font-medium">
-          Текстовый бизнес-симулятор нового поколения. Пройдите путь от скромного стартапа до многомиллионной корпорации, балансируя на грани закона, долгов и собственного здоровья.
-        </p>
+        {!about && (
+          <p className="text-gray-300 text-xs md:text-sm max-w-sm mx-auto mb-6 leading-relaxed font-medium">
+            Текстовый бизнес-симулятор нового поколения. Пройдите путь от скромного стартапа до многомиллионной корпорации, балансируя на грани закона, долгов и собственного здоровья.
+          </p>
+        )}
 
         {about ? (
           <div className="card text-left w-full mt-4 glow-indigo animate-card-draw">
@@ -262,13 +303,15 @@ export default function MainMenu({ hasSave, onNew, onContinue }: Props) {
           </div>
         )}
         
-        <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
-          {["8 происхождений", "7 сфер бизнеса", "выживание и баланс"].map((t) => (
-            <span key={t} className="text-[10px] font-bold tracking-wide text-indigo-300/90 bg-indigo-500/10 border border-indigo-500/25 rounded-full px-2.5 py-1">
-              {t}
-            </span>
-          ))}
-        </div>
+        {!about && (
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
+            {["8 происхождений", "7 сфер бизнеса", "выживание и баланс"].map((t) => (
+              <span key={t} className="text-[10px] font-bold tracking-wide text-indigo-300/90 bg-indigo-500/10 border border-indigo-500/25 rounded-full px-2.5 py-1">
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
 
         <p className="muted text-[10px] font-semibold tracking-wider mt-5 uppercase border-t border-gray-800/40 pt-3 w-full">
           Версия 0.1 · Этап 1 · 3 месяца

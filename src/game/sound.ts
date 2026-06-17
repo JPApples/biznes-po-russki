@@ -168,3 +168,29 @@ export function hookFirstGesture(): void {
   window.addEventListener("pointerdown", h);
   window.addEventListener("keydown", h);
 }
+
+/** Soft click on every button press, app-wide (juice).
+ *  A button may override or silence its sound via data-sfx:
+ *  "off"|"none" → silent, "sip"|"clink"|"cash" → that one-shot, else a soft click.
+ *  A short de-dupe window prevents the same interaction from stacking sounds. */
+let uiHooked = false;
+let lastUiSfx = 0;
+export function hookUiSounds(): void {
+  if (uiHooked) return;
+  uiHooked = true;
+  document.addEventListener("pointerdown", (e) => {
+    const t = e.target as HTMLElement | null;
+    const btn = t?.closest("button") as HTMLButtonElement | null;
+    if (!btn || btn.disabled) return;
+    const now = (typeof performance !== "undefined" ? performance.now() : Date.now());
+    if (now - lastUiSfx < 80) return; // collapse duplicate/rapid events
+    lastUiSfx = now;
+    switch (btn.dataset.sfx) {
+      case "off": case "none": return;
+      case "sip": sfx.sip(); break;
+      case "clink": sfx.clink(); break;
+      case "cash": sfx.cash(); break;
+      default: sfx.click();
+    }
+  });
+}

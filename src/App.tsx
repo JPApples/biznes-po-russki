@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { PlayerState } from "./engine/types";
 import { GameEngine } from "./engine/engine";
 import { saveGame, loadGame, hasSave, clearSave } from "./game/storage";
-import { hookFirstGesture } from "./game/sound";
+import { hookFirstGesture, hookUiSounds } from "./game/sound";
 import MainMenu from "./components/MainMenu";
 import CharacterCreation from "./components/CharacterCreation";
 import GameScreen from "./components/GameScreen";
@@ -15,7 +15,7 @@ export default function App() {
   const [engine, setEngine] = useState<GameEngine | null>(null);
   const [, setTick] = useState(0);
   const refresh = () => setTick((t) => t + 1);
-  useEffect(() => { hookFirstGesture(); }, []);
+  useEffect(() => { hookFirstGesture(); hookUiSounds(); }, []);
 
   const startNew = () => setScreen("create");
 
